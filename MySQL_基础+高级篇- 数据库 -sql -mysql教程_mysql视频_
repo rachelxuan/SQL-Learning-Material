@@ -1,0 +1,355 @@
+MySQL_基础+高级篇- 数据库 -sql -mysql教程_mysql视频_mysql入门_尚硅谷
+
+数据库常见概念
+DB：保存一组有组织的数据的容器
+DBMS：数据库管理系统，又称为数据库软件产品，用于管理DB中的数据
+SQL：结构化查询语言
+
+数据库存储数据的特点
+1.数据库放到表中，表放到库中
+2.一个库可以有多张表，每张表具有唯一的表名来标识自己
+3.表中有一个或者多个列，列又被称为字段，相当于java中的属性
+
+Mysql的常见命令
+1.查看当前所有的数据库
+show databases;
+2.打开指定的库
+use 库名
+3.查看当前库的所有表
+show tables;
+4.查看其他库的所有表
+show tables from 库名;
+5.创建表
+create table 表名(
+    列名,列类型
+    列名,列类型
+    列名,列类型)
+6.查看表结构
+    desc 表名;
+
+进阶1：查询基础
+
+语法：SELECT 查询语句 FROM 表名；
+特点：
+1）查询列表可以是:表中的字段，常量值，表达式和函数
+2）查询的结果是一个虚拟的表格
+USE myemployees;
+方式1:查询表中的单个字段
+SELECT last_name FROM employees;
+方式2:查询表中的多个字段
+方式3:查询表中的所有字段
+SELECT * FROM employees;
+方式4:查询常量
+注意：字符型和日期型的常量值必须用单引号引起来，数值型不需要
+方式5：查询表达式
+SELECT 100*98
+方式6：查询函数
+SELECT VERSION();
+方式7:起别名
+as和空格
+方式8:去重
+select distinct 字段名 from 表名；
+
+/*
+便于理解，有重名的时候可以区分开来
+*/
+
+#方式一：使用AS
+SELECT 100*98 AS 结果;
+SELECT last_name AS 姓,first_name AS 名
+From employees;
+#方式二：使用空格
+SELECT last_name 姓,first_name 名
+From employees;
+
+＃8.去重
+#案例：查询员工表中涉及到的所有的部门编号
+SELECT DISTINCT department_id FROM employees;
+
+＃9.+号的作用
+#案例：查询员工名和姓连接成一个字段并显示为姓名
+/*Java中的＋号；
+1.运算符号，两个操作数都为数值型
+2.链接富豪，只要有一个操作数为字符串
+
+mysql中的＋号
+仅仅只有一个功能，运算符号
+
+SELECT 100+90；两个操作数都为数值型，则做加法运算
+SELECT '123'+90;其中一方为字符型，试图将字符型数值转换为数值型
+如果转换成功，则继续做加法运算，如果转化失败，则将字符型数值转换成0
+SELECT ‘john'+90;
+SELECT null+10;只要其中一方为null，则结果肯定为null
+*/
+
+#案例：查询员工名和姓连接成一个字段，并且显示姓名
+SELECT CONCAT('a','b','c') AS 结果
+FROM employees;
+
+5.＃显示出表employees中的全部joib_id(不能重复)
+SELECT DISTINCT job_id FROM employees;
+
+6.＃显示出表employees中的全部列，各个列之间用逗号连接，列头显示为output)
+
+SELECT 
+    IFNULL(commission_pct,0) AS 奖金率,
+    commission_pct
+From 
+    employees;
+#---------------------
+
+SELECT
+    CONCAT('first_name','last_name','job_id',
+    IFnull(commission_pct,0)) AS Out_put
+FROM 
+    employees;
+
+
+#进阶2：条件查询
+/*
+语法：
+SELECT 查询列表
+FROM 表名
+WEHRE 筛选条件
+
+分类：
+    一 按条件表达式筛选
+    简单条件运算符：> < = <> >= <=
+    二 按逻辑表达式筛选
+    逻辑运算符：AND OR NOT
+    三 模糊查询
+    复杂条件运算符
+        LIKE 
+        BETWEEN
+        IN
+        IS NULL
+*/
+案例1：查询部门编号不是在90到110之间，或者工资高于15000的员工信息
+SELECT *
+FROM employees
+WEHRE
+    NOT(department_id>=90 AND department_id<=110)
+    OR salary>15000;
+
+＃三 模糊查询
+/*
+Like 
+特点：
+①一般和通配符搭配使用，可以判断字符型或者数值型
+    通配符：
+    %任意多个字符，包含0个字符  
+    _任意单个字符
+
+Between AND
+①使用Between AND可以提高语句的简洁度
+②包含临界值
+③两个值不可以颠倒顺序
+
+IN
+含义：
+①判断某字段的值是否属于in列表中的某一项
+特点：
+①使用in提高语句简洁度
+②in列表的值类型必须统一或兼容
+③in不支持通配符
+
+IS null
+用于判断null值
+
+Is not null
+
+①=或者<>不能用于判断null值
+②is null或is not null可以判断null值 
+
+*/
+
+#1.Like 
+#案例一：查询员工名中包含字符a的员工信息
+SELECT *
+FROM
+    employees
+WHERE 
+    last_name LIKE '%a%';
+
+#案例2：查询员工名中第三个字符为e，第五个字符为a的员工名和工资
+SELECT last_name,salary
+FROM employees
+WHERE last_name LIKE '__e_a%';
+
+#案例3：查询员工名中第二个字符为_的员工名
+SELECT last_name
+FROM employees
+WHERE last_name LIKE '_$_%' ESCAPE '$';
+
+#2.between AND
+#案例1：查询员工编号在100和120之间的员工信息
+SELECT *
+FROM employees
+WHERE employee_id between 100 and 120;
+
+#3.IN
+#案例：查询员工的工种编号是 IT_PROG,AD_VP,AD_PRES中的一个员工名和工种编号
+SELECT 
+    last_name
+    job_id
+FROM employees
+WHERE job_id IN ('IT_PROT','AD_VP', 'AD_PRES')
+
+#3.is null
+#案例1:查询没有奖金的员工名和奖金率
+SELECT
+    last_name,
+    commission_pct
+FROM employees
+WHERE
+    commission_pct is null
+
+#安全等于 <=>
+#案例1:查询没有奖金的员工名和奖金率
+SELECT
+    last_name,
+    commission_pct
+FROM employees
+WHERE
+    commission_pct <=> null;
+#IS null PK <=>
+isnull：仅仅可以判断null值，可读性较高
+<=>:既可以判断null值，又可以判断普通的数值，可读性较低
+
+＃2.查询员工号为176的员工的姓名和部门号和年薪
+SELECT 
+last_name,
+department_id,
+salary*12*(1+IFNULL(commission_pct,0)) AS 年薪
+FROM employees;
+
+＃案例1：查询没有奖金，且工资小于18000的salary和last_name
+SELECT salary,last_name
+FROM employees
+WHERE 
+salary<18000
+AND commission_pct IS null;
+
+＃案例2:查询emloyee   s表中，job_id不为‘IT’
+或者工资为12000的员工信息
+SELECT *
+From employees
+WHERE salary＝12000
+OR job_id <> 'IT';
+
+＃案例3:经典面试题：
+试问：SELECT ＊ FROM employee 和
+SELECT ＊ From employees
+WHERE commission_pct like '%%'
+and last_name like '%%';
+结果是否一样？并说明原因
+不一样！
+如果判断的字段有null值，如果所有字段都加上用or链接，这个会是一样的
+
+＃进阶3:排序查询
+语法
+
+/＊
+语法：SELECT 查询列表
+     from 表
+     ［Where 筛选条件］
+     order by 排序列表［asc desc］
+特点：
+    1.asc代表升序，desc代表降序
+    如果不写，默认是升序
+    2.order by子句中可以支持单个或者多个字段，表达式和函数，别名
+    3.order by子句一般放在查询语句的最后面 limit子句除外
+*/
+＃案例1：查询员工信息，要求工资从高到低排序
+SELECT ＊
+FROM employees
+ORDER BY salary DESC；
+SELECT ＊
+FROM employees
+ORDER BY salary ASC；
+ 
+ ＃案例2：查询部门编号>=90的员工信息，按入职时间的先后
+SELECT ＊
+FROM employees
+Where deparment_id>=90
+ORDER BY hibredate ASC；
+
+＃案例3：按年薪的高低显示员工的信息和年薪［按表达式排序］
+SELECT ＊,salary*12*(1+Ifnull(commission_pct,0)) 年薪
+FROM employees
+ORDER BY salary*12*(1+Ifnull(commission_pct,0)) DESC;
+
+＃案例4：按年薪的高低显示员工的信息和年薪［按别名排序］
+SELECT ＊,salary*12*(1+Ifnull(commission_pct,0)) 年薪
+FROM employees
+ORDER BY 年薪 DESC;
+
+＃案例5：按姓名的长度显示员工的姓名和工资［按函数排序］
+SELECT Length(last_name) AS 字节长度,last_name,salary
+FROM employees
+ORDER BY Length(last_name) DESC;
+
+＃案例6：查询员工信息，要求先按工资排序，再按员工编号排序
+［按多个字段排序］
+SELECT *
+FROM employees
+ORDER BY salary ASC,employee_id DESC;
+
+＃案例1：查询员工的姓名和部门号和年薪，按照年薪降序，按姓名升序
+SELECT last_name，department_id,salary*12*(1+Ifnull(commission_pct,0)) 年薪
+From employees
+ORDER BY 年薪 DESC, last_name ASC;
+
+＃案例2：选择工资不在8000到17000的员工的姓名和工资，按工资降序
+SELECT last_name，salary
+FROM employee
+WHERE salary NOT between 8000 AND 17000
+ORDER BY salary desc;
+
+＃案例3:查询邮箱中包含e的员工信息，并先按邮箱的字节数降序，再按部门号升序
+SELECT *
+FROM employees
+WHERE email LIKE '%e%'
+ORDER by Length(email) DESC, deparment_id ASC;
+
+＃进阶4:常见函数
+/＊
+概念：类似于java的方法，将一组逻辑语句封装在方法体重，对外暴露方法名
+好处:   1.隐藏了实现细节  2.提高了代码的重用性
+调用：select 函数名(实参列表) [from表]；
+特点：叫什么（函数名）干什么（函数功能）
+分类：1.单行函数
+    如concat length ifnull等
+    分类：字符函数，数学函数，日期函数，其他函数［补充］，流程控制函数［补充］
+    
+    2.分组函数
+    功能：做统计使用，又称为统计函数 聚合函数 组函数
+*/
+
+＃一 字符函数
+
+＃1.length 获取参数值的字节个数
+SELECT Length('john');
+SELECT Length('张三丰hahaha');
+
+＃2.conct 拼接字符串
+SELECT Concat(last_name,'_',first_name);
+FROM employees
+
+＃3.upper,lower
+SELECT Upper('john');
+SELECT lower('joHn');
+#案例：将姓变大写 名变小写 然后拼接
+SELECT CONCAT(UPPER(last_name),Lower(first_name)) 姓名
+FROM employees;
+
+#4.substr,substring
+注意：索引从1开始
+#截取从指定索引处后面所有字符
+SELECT substr('李莫愁爱上了陆展元',7) out_put;
+
+#截取从指定索引处指定字符长度的字符
+SELECT substr（'李莫愁爱上了陆展元',1,3）out_put;
+
+＃案例：姓名中首字符大写，其他字符小写然后用_拼接，显示出来
+SELECT CONCAT（
